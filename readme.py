@@ -79,10 +79,11 @@ def make_symlink(filename, fullfilename):
         symlink_file = os.path.join(symlink_folder, filename)
         try:
             os.unlink(symlink_file)
+            os.symlink(fullfilename, symlink_file)
+            print ("Symlink updated %s" % symlink_file)
         except OSError:
-            pass
-        os.symlink(fullfilename, symlink_file)
-        print ("Symlink created %s" % symlink_file)
+            os.symlink(fullfilename, symlink_file)
+            print ("Symlink created %s" % symlink_file)
     else:
         print ("No config found, or no value in config")
 
