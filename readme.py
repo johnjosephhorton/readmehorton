@@ -6,45 +6,100 @@
 
 import sys
 import os
-import unittest
-import argparse
 
 try:
-    #python 2.x
-    import ConfigParser as configparser
+    import ConfigParser as configparser #python 2.x
 except ImportError:
-    #python 3.x
-    import configparser
+    import configparser #python 3.x
 
 import yaml
 import time
 import datetime
-import glob
+import fnmatch
 from collections import OrderedDict
 
-FILENAME = 'README_%s.txt'
+def check_platform():
+    """Checks that it is not windows platform"""
+    if sys.platform.startswith('win'):
+        raise WindowsError("This script can be run only on Unix systems")
 
+def get_symlink_folder():
+    """Reads config file (if exists) to get config value of symlink_folder"""
+    section, key = "SYMLINK_FOLDER", 'path'
+    config = configparser.ConfigParser()
+    if os.path.exists('readme_config.ini'):
+        config.readfp(open('readme_config.ini'))
+        if config.has_option(section, key):
+            symlink_folder = config.get(section, key)
+        else:
+            symlink_folder = None
+    else:
+        symlink_folder = None
+    return symlink_folder
+
+def get_keywords():
+    """Gets command line args, using sys argv instead of argparse"""
+    keywords = ",".join(sys.argv[1:])
+    if not keywords:
+        raise ValueError("No Keywords was supplied")
+    return keywords
+
+def find_files(directory, pattern):
+    """Find all file in this folder and sub-folders"""
+    for root, dirs, files in os.walk(directory):
+        for basename in files:
+            if fnmatch.fnmatch(basename, pattern):
+                filename = os.path.join(root, basename)
+                yield filename
+
+def get_cur_folder_name():
+    """return  cur folder name"""
+    return  os.path.split(os.path.abspath(os.path.curdir))[1]
+
+def get_file_list():
+    """return generator list of file"""
+    return [filename for filename in find_files('.', '*')]
+
+def make_symlink(source):
+    """Makes symlink for readme file in specified folder in config file"""
+    symlink_folder = get_symlink_folder()
+    if symlink_folder:
+        os.symlink(source, symlink_folder)
+    else:
+        print "No config found, or no value in config"
+
+def get_readme_filenames(foldername):
+    """return readme short name (filename) and full name (file_location) """
+    FILENAME = 'README_%s.txt'
+    filename = FILENAME % foldername
+    file_location = os.path.join(os.path.abspath(os.path.curdir), file_name)
+    return filename, file_location
+
+def make_structure_for_dumping(location, timestamp, keywords, files):
+    """Prepares dump structure"""
+    #dump_structure = OrderedDict()
+    dump_structure = {}
+    dump_structure['Location'] = location
+    dump_structure['Timestamp'] = timestamp
+    dump_structure['Keywords'] = keywords
+    dump_structure['files'] = files
+    return dump_structure
+
+def dump_structure(file_name, dump_structure):
+    with open(file_name, 'w') as stream:
+        yaml.dump(dump_structure, stream, default_flow_style=False ,  line_break=None)
+        print ("Succesfully prepared readme file: %s" % (file_name, ))
 
 def main():
-    location = ''
+    check_platform()
+    keywords = get_keywords()
     timestamp = int(time.time())
-    keywords = ''
-    files = ''
-
-    folder_name = 'this_folder_name'
-    file_name = FILENAME % folder_name
-
-    dump_structure = OrderedDict()
-    dump_structure['location'] = location
-    dump_structure['timestamp'] = timestamp
-    dump_structure['keywords'] = keywords
-    dump_structure['files'] = files
-
-    stream = file(file_name, 'wb')
-    yaml.dump(dump_structure, stream)
-    print ("Succesfully prepared readme file: %s" % file_name)
-
+    files = get_file_list()
+    folder_name = get_cur_folder_name()
+    filename, location =  get_readme_filenames(folder_name)
+    structure = make_structure_for_dumping(location, timestamp, keywords, files)
+    dump_structure(filename, structure)
+    make_symlink(file_name)
 
 if __name__=='__main__':
-    #unittest.main()
     main()
