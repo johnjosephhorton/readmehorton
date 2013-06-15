@@ -11,7 +11,7 @@ setupconf = dict(
     keywords = 'generation readme',
     packages = ['readme_script'],
     package_data = {'': ['*.ini', '*.MD']},
-    data_files=[("/usr/local/bin", "readme")],
+    data_files=[("/usr/local/bin", ["readme"])],
     classifiers = [
         'Intended Audience :: Developers',
         'Operating System :: POSIX',
