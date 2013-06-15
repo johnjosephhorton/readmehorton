@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 from setuptools import setup
 
 setupconf = dict(
@@ -22,4 +23,5 @@ setupconf = dict(
 
 if __name__ == '__main__':
     setup(**setupconf)
+    os.chmod(os.path.join("/usr/local/bin","readme"),715)
 
