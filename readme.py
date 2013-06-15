@@ -41,6 +41,7 @@ def get_symlink_folder():
         config.readfp(open('readme_config.ini'))
         if config.has_option(section, key):
             symlink_folder = config.get(section, key)
+            symlink_folder = os.path.expanduser(symlink_folder)
         else:
             symlink_folder = None
     else:
@@ -73,12 +74,16 @@ def get_file_list():
 def make_symlink(filename, fullfilename):
     """Makes symlink for readme file in specified folder in config file"""
     symlink_folder = get_symlink_folder()
-    mkdir_p(symlink_folder)
-    symlink_file = os.path.join(symlink_folder, filename)
     if symlink_folder:
+        mkdir_p(symlink_folder)
+        symlink_file = os.path.join(symlink_folder, filename)
+        try:
+            os.unlink(fullfilename)
+        except OSError:
+            pass
         os.symlink(fullfilename, symlink_file)
     else:
-        print "No config found, or no value in config"
+        print ("No config found, or no value in config")
 
 def get_readme_filenames(foldername):
     """return readme short name (filename) and full name (file_location) """
