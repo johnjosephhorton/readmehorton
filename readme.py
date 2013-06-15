@@ -70,12 +70,13 @@ def get_file_list():
     """return generator list of file"""
     return [filename for filename in find_files('.', '*')]
 
-def make_symlink(source):
+def make_symlink(filename, fullfilename):
     """Makes symlink for readme file in specified folder in config file"""
     symlink_folder = get_symlink_folder()
     mkdir_p(symlink_folder)
+    symlink_file = os.path.join(symlink_folder, filename)
     if symlink_folder:
-        os.symlink(source, symlink_folder)
+        os.symlink(fullfilename, symlink_file)
     else:
         print "No config found, or no value in config"
 
@@ -107,10 +108,10 @@ def main():
     timestamp = int(time.time())
     files = get_file_list()
     folder_name = get_cur_folder_name()
-    filename, location =  get_readme_filenames(folder_name)
-    structure = make_structure_for_dumping(location, timestamp, keywords, files)
+    filename, fullfilename =  get_readme_filenames(folder_name)
+    structure = make_structure_for_dumping(fullfilename, timestamp, keywords, files)
     dump_structure(filename, structure)
-    make_symlink(filename)
+    make_symlink(filename, fullfilename)
 
 if __name__=='__main__':
     main()
