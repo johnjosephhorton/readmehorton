@@ -16,12 +16,22 @@ import yaml
 import time
 import datetime
 import fnmatch
+import errno
 from collections import OrderedDict
 
 def check_platform():
     """Checks that it is not windows platform"""
     if sys.platform.startswith('win'):
         raise WindowsError("This script can be run only on Unix systems")
+
+def mkdir_p(path):
+    """ Mkdir if not exists """
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST:
+            pass
+        else: raise
 
 def get_symlink_folder():
     """Reads config file (if exists) to get config value of symlink_folder"""
@@ -63,6 +73,7 @@ def get_file_list():
 def make_symlink(source):
     """Makes symlink for readme file in specified folder in config file"""
     symlink_folder = get_symlink_folder()
+    mkdir_p(symlink_folder)
     if symlink_folder:
         os.symlink(source, symlink_folder)
     else:
