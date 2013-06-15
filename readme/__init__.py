@@ -33,20 +33,25 @@ def mkdir_p(path):
             pass
         else: raise
 
-def get_symlink_folder():
-    """Reads config file (if exists) to get config value of symlink_folder"""
-    section, key = "SYMLINK_FOLDER", 'path'
+def get_config_value(section):
+    """Reads config file (if exists) to get config value """
+    key = 'path'
     config = configparser.ConfigParser()
     if os.path.exists('readme_config.ini'):
         config.readfp(open('readme_config.ini'))
         if config.has_option(section, key):
-            symlink_folder = config.get(section, key)
-            symlink_folder = os.path.expanduser(symlink_folder)
+            value = config.get(section, key)
+            if value.startswith('~'):
+                value = os.path.expanduser(value)
         else:
-            symlink_folder = None
+            value = None
     else:
-        symlink_folder = None
-    return symlink_folder
+        value = None
+
+    if value is None:
+        raise ValueError("No config found, or no value in config %s" %section)
+
+    return value
 
 def get_keywords():
     """Gets command line args, using sys argv instead of argparse"""
@@ -71,28 +76,32 @@ def get_file_list():
     """return generator list of file"""
     return [filename for filename in find_files('.', '*')]
 
-def make_symlink(filename, fullfilename):
-    """Makes symlink for readme file in specified folder in config file"""
-    symlink_folder = get_symlink_folder()
-    if symlink_folder:
-        mkdir_p(symlink_folder)
-        symlink_file = os.path.join(symlink_folder, filename)
-        try:
-            os.unlink(symlink_file)
-            os.symlink(fullfilename, symlink_file)
-            print ("Symlink updated %s" % symlink_file)
-        except OSError:
-            os.symlink(fullfilename, symlink_file)
-            print ("Symlink created %s" % symlink_file)
+def make_symlink(fullfilename, output_folder, new_name=None):
+    """Makes symlink for readme file in specified folder in config file
+    if @new_name specified - symlink will have other name
+    """
+    if new_name:
+        filename = new_name
     else:
-        print ("No config found, or no value in config")
+        filename = os.path.basename(fullfilename)
 
-def get_readme_filenames(foldername):
-    """return readme short name (filename) and full name (file_location) """
+    mkdir_p(output_folder)
+    symlink_file = os.path.join(output_folder, filename)
+    try:
+        os.unlink(symlink_file)
+        os.symlink(fullfilename, symlink_file)
+        print ("Symlink updated %s" % symlink_file)
+    except OSError:
+        os.symlink(fullfilename, symlink_file)
+        print ("Symlink created %s" % symlink_file)
+
+
+def get_readme_filename(foldername):
+    """return readme full name (file_location) """
     FILENAME = 'README_%s.txt'
     filename = FILENAME % foldername
     file_location = os.path.join(os.path.abspath(os.path.curdir), filename)
-    return filename, file_location
+    return file_location
 
 def make_structure_for_dumping(location, timestamp, keywords, files):
     """Prepares dump structure"""
@@ -109,16 +118,23 @@ def dump_structure(file_name, dump_structure):
         yaml.dump(dump_structure, stream, default_flow_style=False ,  line_break=None)
         print ("Succesfully prepared readme file: %s" % (file_name, ))
 
+def make_bin_symlink():
+    """Copy symlink to current script to BIN folder from config"""
+    bin_folder = get_config_value('BIN_FOLDER')
+    make_symlink(__file__, bin_folder, new_name='readme')
+
 def main():
     check_platform()
     keywords = get_keywords()
     timestamp = int(time.time())
     files = get_file_list()
     folder_name = get_cur_folder_name()
-    filename, fullfilename =  get_readme_filenames(folder_name)
-    structure = make_structure_for_dumping(fullfilename, timestamp, keywords, files)
+    filename =  get_readme_filename(folder_name)
+    structure = make_structure_for_dumping(filename, timestamp, keywords, files)
     dump_structure(filename, structure)
-    make_symlink(filename, fullfilename)
+
+    symlink_folder = get_config_value("SYMLINK_FOLDER")
+    make_symlink(filename, symlink_folder)
 
 if __name__=='__main__':
     main()
