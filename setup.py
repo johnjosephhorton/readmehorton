@@ -2,16 +2,16 @@
 from setuptools import setup
 
 setupconf = dict(
-    name = 'readme',
+    name = 'readme_script',
     version = '0.0.1',
     url = 'https://github.com/pymen/readmehorton',
     author = 'Anton Sedov',
     author_email = 'sedovanton@gmail.com',
     description = 'Generation of reame files with content of current and sub folders',
     keywords = 'generation readme',
-    packages = ['readme'],
-    package_data = {'': ['*.ini', '*.MD', '*.py']},
-    #data_files=[("/usr/local/bin", "readme/readme")],
+    packages = ['readme_script'],
+    package_data = {'': ['*.ini', '*.MD']},
+    data_files=[("/usr/local/bin", "readme")],
     classifiers = [
         'Intended Audience :: Developers',
         'Operating System :: POSIX',

@@ -36,9 +36,12 @@ def mkdir_p(path):
 def get_config_value(section):
     """Reads config file (if exists) to get config value """
     key = 'path'
+    config_filename = 'readme_config.ini'
     config = configparser.ConfigParser()
-    if os.path.exists('readme_config.ini'):
-        config.readfp(open('readme_config.ini'))
+    real_folder = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(real_folder,config_filename)
+    if os.path.exists(config_path):
+        config.readfp(open(config_path))
         if config.has_option(section, key):
             value = config.get(section, key)
             if value.startswith('~'):
@@ -123,7 +126,7 @@ def make_bin_symlink():
     bin_folder = get_config_value('BIN_FOLDER')
     make_symlink(__file__, bin_folder, new_name='readme')
 
-def main():
+def run():
     check_platform()
     keywords = get_keywords()
     timestamp = int(time.time())
@@ -132,9 +135,6 @@ def main():
     filename =  get_readme_filename(folder_name)
     structure = make_structure_for_dumping(filename, timestamp, keywords, files)
     dump_structure(filename, structure)
-
     symlink_folder = get_config_value("SYMLINK_FOLDER")
     make_symlink(filename, symlink_folder)
 
-if __name__=='__main__':
-    main()
