@@ -83,7 +83,7 @@ def get_readme_filenames(foldername):
     """return readme short name (filename) and full name (file_location) """
     FILENAME = 'README_%s.txt'
     filename = FILENAME % foldername
-    file_location = os.path.join(os.path.abspath(os.path.curdir), file_name)
+    file_location = os.path.join(os.path.abspath(os.path.curdir), filename)
     return filename, file_location
 
 def make_structure_for_dumping(location, timestamp, keywords, files):
@@ -110,7 +110,7 @@ def main():
     filename, location =  get_readme_filenames(folder_name)
     structure = make_structure_for_dumping(location, timestamp, keywords, files)
     dump_structure(filename, structure)
-    make_symlink(file_name)
+    make_symlink(filename)
 
 if __name__=='__main__':
     main()
