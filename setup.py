@@ -23,5 +23,6 @@ setupconf = dict(
 
 if __name__ == '__main__':
     setup(**setupconf)
-    os.chmod(os.path.join("/usr/local/bin","readme"),715)
+    copied_file = os.path.join("/usr/local/bin","readme")
+    os.system('sudo bash update_chmod.sh')
 
