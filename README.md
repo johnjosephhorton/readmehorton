@@ -1,6 +1,15 @@
 Command line python script called "readme" that, 
 
+INSTALLATION
+sudo python setup.py install
+
+you need to use sudo, because after install it copies readme short script to usr/local/bin
+which allows to run current script from anywhere
+
+
+DOC
 when run from any location on the linux filesystem, 
+
 
 generates a new file in same directory called 
 "README_<enclosing_directory>.txt". 

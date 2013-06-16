@@ -5,4 +5,4 @@ try:
     import readme_script
     readme_script.run()
 except ImportError:
-    print ("Please first install readme using 'python setup.py install' command")
+    print ("Please first install readme using 'sudo python setup.py install' command")
